@@ -1,7 +1,7 @@
 import os
-from module import import_file
+from wsgitest.utils import import_file
 
-_conf_module = import_file(os.path.join(os.getcwd(), 'config.py'))
+_conf_module = import_file(os.path.join(os.getcwd(), 'wsgitest_config.py'))
 
 SERVER_HOST = getattr(_conf_module, 'SERVER_HOST', '127.0.0.1')
 SERVER_PORT = getattr(_conf_module, 'SERVER_PORT', 9999)

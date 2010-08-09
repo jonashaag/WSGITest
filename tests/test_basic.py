@@ -1,4 +1,4 @@
-import expect
+from wsgitest import expect
 
 @expect.status(200, 'Ok')
 @expect.header('Content-Length', '5')

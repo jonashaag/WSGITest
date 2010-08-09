@@ -1,6 +1,6 @@
 import os
 import sys
-from wsgitest.module import import_file
+from wsgitest.utils import import_file
 from wsgitest import config
 
 app_file, app_name = sys.argv[1:3]

@@ -1,8 +1,8 @@
 import sys
 import httplib
 from itertools import chain, count
-from wsgitest import expect
-from wsgitest import config
+from wsgitest import expect, config
+from wsgitest.utils import stderr
 
 def normalize_docstring(docstr):
     docstr = docstr.strip('\n')
@@ -74,11 +74,12 @@ class Test(object):
             # explain for example a 'Connection refused' socket error.
             # print them first.
             server_process.terminate()
-            stderr = server_process.stderr.read()
-            if stderr:
-                print >> sys.stderr, 'Expection in server:'
-                print >> sys.stderr, stderr.strip('\n')
-                print >> sys.stderr, '-' * 80
+            stderr_outp = server_process.stderr.read()
+            if stderr_outp:
+                stderr('-' * 80)
+                stderr('Expection in server:')
+                stderr(stderr_outp.strip('\n'))
+                stderr('-' * 80)
 
             # now, re-raise the original traceback, if any.
             if exception_occurred:

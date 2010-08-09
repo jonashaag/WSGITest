@@ -6,7 +6,7 @@ import subprocess
 
 from wsgitest import config
 
-SERVER_RUNNER = os.path.join(os.path.dirname(__file__), 'run-server.py')
+SERVER_RUNNER = os.path.join(os.path.dirname(__file__), os.pardir, 'run-server.py')
 
 def run(test):
     app_file = inspect.getsourcefile(test.app)

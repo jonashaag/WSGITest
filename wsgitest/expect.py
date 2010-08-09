@@ -46,6 +46,6 @@ def server_error(response, exception_name, exception_body=None):
         name, body = (None, None)
     if name != exception_name:
         if exception_name:
-            yield 'Server raised %s, expected %s' % (name, exception_name)
+            yield 'Server raised %s, expected %s' % (exc, exception_name)
         else:
-            yield 'Server raised %s' % name
+            yield 'Server raised %s' % exc
