@@ -61,10 +61,10 @@ class Test(object):
                 errors = tuple(validator(response))
                 if errors:
                     self.errors.append((validator, errors))
-            if server_process.terminate():
-                errors = tuple(self.stderr_validator(response, server_process.stderr_buf))
-                if errors:
-                    self.errors.append((self.stderr_validator, errors))
+            server_process.terminate()
+            errors = tuple(self.stderr_validator(response, server_process.stderr_buf))
+            if errors:
+                self.errors.append((self.stderr_validator, errors))
         except httplib.BadStatusLine:
             self.errors.append(('Response', ['empty (probably server segfault)']))
         except:
@@ -75,12 +75,12 @@ class Test(object):
             # we definitely want to see them, because they can
             # explain for example a 'Connection refused' socket error.
             # print them first.
-            if server_process.terminate():
-                if server_process.stderr_buf:
-                    stderr('-' * 80)
-                    stderr('Uncatched expection in server:')
-                    stderr(server_process.stderr_buf.strip('\n'))
-                    stderr('-' * 80)
+            server_process.terminate()
+            if server_process.stderr_buf:
+                stderr('-' * 80)
+                stderr('Uncatched expection in server:')
+                stderr(server_process.stderr_buf.strip('\n'))
+                stderr('-' * 80)
 
             if server_process.killed:
                 self.errors.append(('Killed', [server_process.killed_msg]))

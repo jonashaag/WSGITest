@@ -16,10 +16,12 @@ def test_with_content_length(env, start_response):
 @expect.server_error(TypeError)
 def test_too_few_arguments(env, start_response):
     start_response('200 Ok')
+    return []
 
 @expect.server_error(TypeError)
 def test_too_many_arguments(env, start_response):
-    start_response('200 Ok', [], 42)
+    start_response('200 Ok', [], 42, 42)
+    return []
 
 @expect.server_error(TypeError)
 def test_wrong_types1(env, start_response):

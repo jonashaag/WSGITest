@@ -1,10 +1,12 @@
 from wsgitest import expect
 
+@expect.status(200, 'ok')
 def test_GET(env, start_response):
     assert env['REQUEST_METHOD'] == 'GET'
     start_response('200 ok', [])
     return ()
 
+@expect.status(200, 'ok')
 def test_POST(env, start_response):
     '''
     POST / HTTP/1.0
@@ -13,6 +15,7 @@ def test_POST(env, start_response):
     start_response('200 ok', [])
     return []
 
+@expect.status(400)
 def test_BLAH(env, start_response):
     '''
     BLAH / HTTP/1.0
@@ -24,6 +27,7 @@ def test_BLAH(env, start_response):
 # TODO: SCRIPT_NAME
 #       PATH_INFO
 
+@expect.status(200, 'ok')
 def test_query_string(env, start_response):
     '''
     GET /hello?foo=bar&x=y
@@ -32,11 +36,13 @@ def test_query_string(env, start_response):
     start_response('200 ok', [])
     return iter(lambda: None, None)
 
+@expect.status(200, 'ok')
 def test_empty_query_string(env, start_response):
     assert env.get('QUERY_STRING', '') == ''
     start_response('200 ok', [])
     return ['blah']
 
+@expect.status(200, 'ok')
 def test_server_star(env, start_response):
     from wsgitest import config
     assert env['SERVER_HOST'] == config.SERVER_HOST
@@ -44,29 +50,31 @@ def test_server_star(env, start_response):
     start_response('200 ok', [])
     return ()
 
+@expect.status(200, 'ok')
 def test_server_protocol(env, start_response):
     assert env['SERVER_PROTOCOL'] == 'HTTP/1.0'
     start_response('200 ok', [])
     return []
 
+@expect.status(200, 'ok')
 def test_http_vars(env, start_response):
     '''
-    SOMEMETHOD /foo
+    GET /foo
     x-hello-iam-a-header: 42,42
     IgNoREtheCAsE_pLeas-E: hello world!
     and-a-multiline-value: foo 42
      bar and so
      on
     '''
-    for k, v in {
+    assert env == {
         'HTTP_X_HELLO_IAM_A_HEADER' : '42,42',
         'HTTP_IGNORETHECASE_PLEAS_E' : 'hello world!',
         'AND_A_MULTILINE_VALUE' : 'foo 42 bar and so on'
-    }:
-        assert env[k] == v
+    }, env
     start_response('200 ok', [])
     return []
 
+@expect.status(200, 'ok')
 def test_wsgi_vars(env, start_response):
     assert isinstance(env['wsgi.version'], tuple)
     assert env['wsgi.url_scheme']

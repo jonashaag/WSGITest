@@ -17,18 +17,15 @@ class Subprocess(subprocess.Popen):
     killed = False
 
     def terminate(self):
-        retv = False
         rv = self.poll()
         if rv is None:
             subprocess.Popen.terminate(self)
-            retv = True
         else:
             if rv < 0 and rv != -15:
                 rv = -rv
                 self.killed = True
                 self.killed_msg = SIGNALS.get(rv, rv)
         self.stderr_buf = self.stderr.read().strip('\n')
-        return retv
 
 def run(test):
     app_file = inspect.getsourcefile(test.app)
