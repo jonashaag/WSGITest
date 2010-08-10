@@ -1,5 +1,6 @@
 import os
 import sys
+import textwrap
 from wsgitest import server
 from wsgitest.test import Test
 from wsgitest.utils import stderr, import_file
@@ -37,6 +38,9 @@ def get_folders():
         else:
             yield os.path.join(os.getcwd(), folder)
 
+def to_str(obj):
+    return obj if isinstance(obj, str) else obj.__name__
+
 passed = []
 failed = []
 
@@ -45,12 +49,12 @@ for test in find_tests(get_folders()):
     if test.failed:
         failed.append(test)
         stderr('=' * 80)
-        stderr('Test %d failed, here comes the full-sized report:' % test.id)
+        stderr('%s failed, here comes the full-sized report:' % test.app.__name__)
         stderr('-' * 80)
         for test_no, (validator, errors) in enumerate(test.errors, 1):
-            stderr('%d) %s' % (test_no, validator.__name__.title()))
+            stderr('%d) %s' % (test_no, to_str(validator).title()))
             for error in errors:
-                stderr('   - %s' % error)
+                stderr('   - %s' % '     \n'.join(textwrap.wrap(error, 75)))
         stderr('-' * 80)
         stderr()
     else:
