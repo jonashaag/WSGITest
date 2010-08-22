@@ -7,10 +7,14 @@ from wsgitest.utils import stderr
 def normalize_docstring(docstr):
     if not docstr:
         return docstr
-    docstr = docstr.strip('\n')
+
+    docstr = docstr.strip('\n').split('\n')
+    first_line = docstr[0]
+    indentation = len(first_line) - len(first_line.lstrip())
+
     return '\n'.join(
-        line.lstrip() for line in docstr.split('\n')
-    ).replace('\n\n', '\r\n')
+        line[indentation:] for line in docstr if line[indentation:]
+    ).replace('\n', '\r\n')
 
 class Request(object):
     data = 'GET / HTTP/1.0\r\n\r\n'''

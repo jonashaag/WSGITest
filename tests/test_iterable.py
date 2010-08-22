@@ -11,6 +11,9 @@ def test_simple(env, start_response):
     yield 'simple\n'
     yield 'iterable'
 
+@expect.server_error(NameError)
+# no expectations for body/status here,
+# because the response in this is undefined.
 def test_with_error(env, start_response):
     start_response('200 Ok', [])
     yield 'foo'
