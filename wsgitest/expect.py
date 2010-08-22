@@ -34,7 +34,11 @@ def header(response, name, expected_value):
 
 @validator
 def body(response, expected_body):
-    body = response.read()
+    import httplib
+    try:
+        body = response.read()
+    except httplib.IncompleteRead as err:
+        body = err.partial
     if body != expected_body:
         yield 'Body is %r, expected %r' % (body, expected_body)
 

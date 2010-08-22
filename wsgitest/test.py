@@ -11,16 +11,22 @@ def normalize_docstring(docstr):
     docstr = docstr.strip('\n').split('\n')
     first_line = docstr[0]
     indentation = len(first_line) - len(first_line.lstrip())
+    if not docstr[0][indentation:]:
+        docstr = docstr[1:]
+    if not docstr[-1][indentation:]:
+        docstr = docstr[:-1]
 
     return '\n'.join(
-        line[indentation:] for line in docstr if line[indentation:]
+        line[indentation:] for line in docstr
     ).replace('\n', '\r\n')
 
 class Request(object):
     data = 'GET / HTTP/1.0\r\n\r\n'''
     def __init__(self, data=None):
         if data is not None:
-            self.data = data.rsplit('\r\n\r\n')[0] + '\r\n\r\n'
+            if not data.endswith('\r\n\r\n'):
+                data += '\r\n\r\n'
+            data = self.data
 
     def connect(self):
         return httplib.HTTPConnection(

@@ -10,6 +10,9 @@ def test_GET(env, start_response):
 def test_POST(env, start_response):
     '''
     POST / HTTP/1.0
+    Content-Length: 12
+
+    hello world!
     '''
     assert env['REQUEST_METHOD'] == 'POST'
     start_response('200 ok', [])

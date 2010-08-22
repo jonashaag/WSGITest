@@ -45,6 +45,7 @@ passed = []
 failed = []
 
 for test in find_tests(get_folders()):
+    #print 'Running test %s...' % test.app.__name__
     test.run(server)
     if test.failed:
         failed.append(test)
