@@ -13,9 +13,10 @@ def normalize_docstring(docstr):
     ).replace('\n\n', '\r\n')
 
 class Request(object):
-    DEFAULT_DATA = 'GET / HTTP/1.0'''
+    data = 'GET / HTTP/1.0\r\n\r\n'''
     def __init__(self, data=None):
-        self.data = data or self.DEFAULT_DATA
+        if data is not None:
+            self.data = data.rsplit('\r\n\r\n')[0] + '\r\n\r\n'
 
     def connect(self):
         return httplib.HTTPConnection(
