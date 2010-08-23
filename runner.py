@@ -71,14 +71,15 @@ def _pprint_test(test, just):
 
 print '=' * 80
 print 'SUMMARY'.center(80)
+print ('%d tests passed, %s failed' % (len(passed), len(failed))).center(80)
 print '=' * 80
-print 'Tests passed:'
+print 'Tests passed: (%d)' % len(passed)
 for test in passed:
     print '   - %s' % _pprint_test(test, 75)
 stderr()
 
 if failed:
-    print 'Tests FAILED:'
+    print 'Tests FAILED: (%d)' % len(failed)
     for test in failed:
         print '   - %s' % _pprint_test(test, 75)
 

@@ -29,7 +29,6 @@ class Request(object):
                 if not data.endswith('\r\n\r\n'):
                     data += '\r\n\r\n'
             self.data = data
-        print repr(self.data)
 
     def connect(self):
         return httplib.HTTPConnection(
