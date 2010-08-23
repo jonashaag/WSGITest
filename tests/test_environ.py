@@ -13,7 +13,7 @@ def test_POST(env, start_response):
     POST / HTTP/1.0
     Content-Length: 12
 
-    hello\\nworld! ... stuff that shouldn't be read ...
+    hello\\nworld!
     '''
     assert env['REQUEST_METHOD'] == 'POST'
     assert env['CONTENT_LENGTH'] == '12'
@@ -48,8 +48,9 @@ def test_query_string(env, start_response):
 @expect.status(200, 'ok')
 def test_content__star(env, start_response):
     '''
-    GET / HTTP/1.0
+    GET / HTTP/1.1
     Content-Type: text/x-python
+    Content-Length: 3
 
     Hi!
     '''
@@ -85,7 +86,7 @@ def test_server_protocol(env, start_response):
 @expect.status(200, 'ok')
 def test_http_vars(env, start_response):
     '''
-    GET /foo HTTP/1.0
+    GET /foo HTTP/1.1
     x-hello-iam-a-header: 42,42
     IgNoREtheCAsE_pLeas-E: hello world!
     and-a-multiline-value: foo 42
@@ -124,7 +125,7 @@ def test_input(env, start_response):
     GET /foo HTTP/1.1
     Content-Length: 29
 
-    Hello\\nWorld,\\r\\n\twhat's\\r\\n\r\\n\\nup?\\r\\n\\r\\n..thismustbeignored
+    Hello\\nWorld,\\r\\n\twhat's\\r\\n\r\\n\\nup?
     '''
     input_ = env['wsgi.input']
 
@@ -144,10 +145,10 @@ def test_input(env, start_response):
 @expect.body('yay')
 def test_errors(env, start_response):
     '''
-    GET /foo HTTP/1.1
+    GET /foo HTTP/1.0
     Content-Length: 29
 
-    Hello\\nWorld,\\r\\n\twhat's\\r\\n\\r\\n\\nup?\\r\\n\\r\\n.thismustbeignored
+    Hello\\nWorld,\\r\\n\twhat's\\r\\n\\r\\n\\nup?
     '''
     errors = env['wsgi.errors']
 

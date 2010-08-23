@@ -24,9 +24,12 @@ class Request(object):
     data = 'GET / HTTP/1.0\r\n\r\n'''
     def __init__(self, data=None):
         if data is not None:
-            if not data.endswith('\r\n\r\n'):
-                data += '\r\n\r\n'
+            if not 'Content-Length' in data:
+                # TODO: ugly
+                if not data.endswith('\r\n\r\n'):
+                    data += '\r\n\r\n'
             self.data = data
+        print repr(self.data)
 
     def connect(self):
         return httplib.HTTPConnection(
