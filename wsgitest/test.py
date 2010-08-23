@@ -18,7 +18,7 @@ def normalize_docstring(docstr):
 
     return '\n'.join(
         line[indentation:] for line in docstr
-    ).replace('\n', '\r\n')
+    ).replace('\n', '\r\n').replace('\\n', '\n').replace('\\r', '\r')
 
 class Request(object):
     data = 'GET / HTTP/1.0\r\n\r\n'''
@@ -26,7 +26,7 @@ class Request(object):
         if data is not None:
             if not data.endswith('\r\n\r\n'):
                 data += '\r\n\r\n'
-            data = self.data
+            self.data = data
 
     def connect(self):
         return httplib.HTTPConnection(
@@ -48,6 +48,10 @@ class Test(object):
         self.request = request
         self.validators = validators
         self.stderr_validator = stderr_validator
+
+    @property
+    def name(self):
+        return self.app.__name__
 
     @classmethod
     def from_func(cls, func):
