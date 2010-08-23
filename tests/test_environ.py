@@ -71,9 +71,8 @@ def test_empty_query_string(env, start_response):
 
 @expect.status(200, 'ok')
 def test_server_star(env, start_response):
-    from wsgitest import config
-    assert env['SERVER_NAME'] == config.SERVER_HOST
-    assert env['SERVER_PORT'] == str(config.SERVER_PORT)
+    assert env['SERVER_NAME'] == SERVER_HOST
+    assert env['SERVER_PORT'] == str(SERVER_PORT)
     start_response('200 ok', [])
     return ()
 
@@ -143,6 +142,7 @@ def test_input(env, start_response):
 
 @expect.status(200)
 @expect.body('yay')
+@expect.server_error('ExpectedError')
 def test_errors(env, start_response):
     '''
     GET /foo HTTP/1.0
@@ -153,8 +153,8 @@ def test_errors(env, start_response):
     errors = env['wsgi.errors']
 
     # test wsgi.errors:
-    errors.write("Hello World, this is an error")
-    errors.writelines(["Hello", "again"])
+    errors.write("Hello World, this is an error\n")
+    errors.writelines(["Hello\n", "ExpectedError: blah"])
     errors.flush()
 
     start_response('200 ok', [])

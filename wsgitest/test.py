@@ -1,4 +1,5 @@
 import sys
+import time
 import httplib
 from itertools import chain, count
 from wsgitest import expect, config
@@ -78,6 +79,7 @@ class Test(object):
                 errors = tuple(validator(response))
                 if errors:
                     self.errors.append((validator, errors))
+            time.sleep(0.01)
             server_process.terminate()
             errors = tuple(self.stderr_validator(response, server_process.stderr_buf))
             if errors:

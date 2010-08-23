@@ -41,6 +41,7 @@ def test_illegal_return_type_and_arguments(env, start_response):
 class MyError(Exception):
     pass
 @expect.status(500, 'error')
+@expect.server_error(MyError)
 def test_myerror(env, start_response):
     start_response('200 ok', [])
     try:

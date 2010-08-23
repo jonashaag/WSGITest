@@ -19,7 +19,6 @@ class Subprocess(subprocess.Popen):
     def terminate(self):
         rv = self.poll()
         if rv is None:
-            time.sleep(0.01) # give the server a chance to flush stderr
             subprocess.Popen.terminate(self)
         else:
             if rv < 0 and rv != -15:

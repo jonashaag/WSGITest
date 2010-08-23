@@ -44,19 +44,31 @@ def body(response, expected_body):
 
 @validator
 def server_error(response, stderr, exception_name, exception_body=None):
-    exc = stderr.split('\n')[-1] or 'nothing'
-    try:
-        name, body = exc.split(':', 1)
-    except ValueError:
-        name, body = (None, None)
+    exc = stderr.split('\n')[-1]
+    if exc:
+        try:
+            name, body = exc.split(':', 1)
+        except ValueError:
+            name = exc
+            body = ''
+    else:
+        name, body = None, None
     if exception_name:
         # error expected, this implicits a @status(500)
         status(500).validate(response)
         # normalize exception_name
         if not isinstance(exception_name, str):
             exception_name = exception_name.__name__ # assume type exceptions.Foo
-    if name != exception_name:
-        if exception_name:
-            yield 'Server raised %s, expected %s' % (exc, exception_name)
-        else:
-            yield 'Server raised %s' % exc
+    if name == exception_name:
+        return
+
+    if name.split('.')[-1] == exception_name:
+        # server may have raised something like 'foo.Error',
+        # but expected is 'Error' -- so try to match when
+        # module prefixes are stripped away
+        return
+
+    if exception_name:
+        yield 'Server raised %s, expected %s' % (exc, exception_name)
+    else:
+        yield 'Server raised %s' % exc
