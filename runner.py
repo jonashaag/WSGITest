@@ -50,14 +50,14 @@ for test in find_tests(get_folders()):
     test.run(server)
     if test.failed:
         failed.append(test)
-        stderr('+' * 80)
+        stderr('-' * 80)
         stderr('%s failed, here comes the full-sized report:' % test.name)
-        stderr('+' * 80)
+        stderr('.' * 80)
         for test_no, (validator, errors) in enumerate(test.errors, 1):
             stderr('%d) %s' % (test_no, to_str(validator).title()))
             for error in errors:
                 stderr('   - %s' % '     \n'.join(textwrap.wrap(error, 75)))
-        stderr('-' * 80)
+        stderr('.' * 80)
         stderr()
     else:
         passed.append(test)
@@ -77,12 +77,12 @@ print '=' * 80
 print 'Tests passed:'
 for test in passed:
     print '   - %s' % _pprint_test(test, 75)
-print '-' * 80
+print '.' * 80
 
 print 'Tests failed'
 for test in failed:
     print '   - %s' % _pprint_test(test, 75)
-print '-' * 80
+print '.' * 80
 
 if not failed:
     exit(0)
