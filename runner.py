@@ -20,13 +20,16 @@ def find_tests(folders):
     for folder in folders:
         seen_files = set()
         for file in find_test_files(folder):
-            if file.endswith('.pyc') and file[:-1] in seen_files:
+            if not os.path.basename(file).startswith('test_'):
+                continue
+            basename, ext = os.path.splitext(file)
+            if basename in seen_files:
                 continue
             module = import_file(file)
             for name in dir(module):
                 if name.startswith('test_'):
                     yield Test.from_func(getattr(module, name))
-            seen_files.add(file)
+            seen_files.add(basename)
 
 
 def get_folders():
