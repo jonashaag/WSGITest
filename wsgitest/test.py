@@ -98,7 +98,7 @@ class Test(object):
             if server_process.stderr_buf:
                 stderr('-' * 80)
                 stderr('Uncatched expection in server:')
-                stderr(server_process.stderr_buf.strip('\n'))
+                stderr(server_process.stderr_buf)
                 stderr('-' * 80)
 
             if server_process.killed:

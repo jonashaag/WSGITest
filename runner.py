@@ -58,7 +58,7 @@ for test in find_tests(get_folders()):
         for test_no, (validator, errors) in enumerate(test.errors, 1):
             stderr('%d) %s' % (test_no, to_str(validator).title()))
             for error in errors:
-                stderr('   - %s' % '     \n'.join(textwrap.wrap(error, 75)))
+                stderr('   - %s' % '\n     '.join(textwrap.wrap(error, 75)))
         stderr()
         stderr()
     else:

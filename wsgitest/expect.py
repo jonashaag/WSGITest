@@ -47,28 +47,39 @@ def server_error(response, stderr, exception_name, exception_body=None):
     exc = stderr.split('\n')[-1]
     if exc:
         try:
-            name, body = exc.split(':', 1)
+            name = exc.split(':', 1)[0]
         except ValueError:
             name = exc
-            body = ''
     else:
-        name, body = None, None
+        name = ''
+        exc = 'nothing'
+
     if exception_name:
         # error expected, this implicits a @status(500)
         status(500).validate(response)
         # normalize exception_name
         if not isinstance(exception_name, str):
-            exception_name = exception_name.__name__ # assume type exceptions.Foo
-    if name == exception_name:
-        return
+            exception_name = exception_name.__name__ # assume an Exception
+                                                     # instance
+        if name == exception_name:
+            # the same exception that was expected was raised, so
+            # everything's fine.
+            return
 
-    if name.split('.')[-1] == exception_name:
-        # server may have raised something like 'foo.Error',
-        # but expected is 'Error' -- so try to match when
-        # module prefixes are stripped away
-        return
+        if name.split('.')[-1] == exception_name:
+            # server may have raised something like 'foo.Error',
+            # but expected is 'Error' -- so try to match when
+            # module prefixes are stripped away
+            return
 
-    if exception_name:
+        # there was an exception, but the wrong one.
         yield 'Server raised %s, expected %s' % (exc, exception_name)
-    else:
+
+    elif name:
+        # there was an exception, but none was expected.
         yield 'Server raised %s' % exc
+
+    else:
+        # there was no exception, and noone was expected;
+        # all systems up! \o/
+        return
