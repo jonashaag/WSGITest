@@ -128,7 +128,8 @@ def test_input(env, start_response):
     assert_equal(input_.readline(), 'ello\n')
     for line in input_:
         assert_equal(line, 'World,\r\n')
-    assert_equal(input_.read(3), 'wha')
+        break
+    assert_equal(input_.read(4), '\twha')
     assert_equal(input_.readlines(), ["t's\r\n", "\r\n", "\n", "up?"])
     assert_equal(input_.read(123), '')
 
