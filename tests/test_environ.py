@@ -1,6 +1,6 @@
 from wsgitest import expect
 from wsgitest.config import SERVER_HOST, SERVER_PORT
-from wsgitest.testutils import assert_equal, assert_isinstance
+from wsgitest.testutils import assert_equal, assert_isinstance, assert_subdict
 
 @expect.status(200, 'ok')
 def test_GET(env, start_response):
@@ -81,7 +81,9 @@ def test_http_vars(env, start_response):
     '''
     GET /foo HTTP/1.1
     x-hello-iam-a-header: 42,42
+    header-twice: 1
     IgNoREtheCAsE_pLeas-E: hello world!
+    header-twice: 2
     and-a-multiline-value: foo 42
     \tbar and\\r\\n\t
     \tso
@@ -92,9 +94,10 @@ def test_http_vars(env, start_response):
     # \r\n(\t| ) has to be replaced by ' '
     env['HTTP_AND_A_MULTILINE_VALUE'] = \
         env['HTTP_AND_A_MULTILINE_VALUE'].replace('\r\n', '').replace('\t', ' ')
-    assert_equal(
+    assert_subdict(
         env,
-        { 'HTTP_X_HELLO_IAM_A_HEADER' : '42,42',
+        { 'HTTP_X_HELLO_IAM_A_HEADER'  : '42,42',
+         'HEADER_TWICE'                : '1,2',
           'HTTP_IGNORETHECASE_PLEAS_E' : 'hello world!',
           'HTTP_AND_A_MULTILINE_VALUE' : 'foo 42 bar and so on'}
     )
