@@ -1,14 +1,14 @@
 from wsgitest import expect
-from wsgitest.config import SERVER_HOST, SERVER_PORT
-from wsgitest.testutils import assert_equal, assert_isinstance, assert_subdict
+from wsgitest.config import SERVER_HOST, SERVER_PORT_RANGE
+from wsgitest.testutils import *
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_GET(env, start_response):
     assert_equal(env['REQUEST_METHOD'], 'GET')
     start_response('200 ok', [])
     return ()
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_POST(env, start_response):
     '''
     POST / HTTP/1.0
@@ -22,7 +22,7 @@ def test_POST(env, start_response):
     start_response('200 ok', [])
     return []
 
-@expect.status(400)
+@expect.Status(400)
 def test_BLAH(env, start_response):
     '''
     BLAH / HTTP/1.0
@@ -34,7 +34,7 @@ def test_BLAH(env, start_response):
 # TODO: SCRIPT_NAME
 #       PATH_INFO
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_query_string(env, start_response):
     '''
     GET /hello?foo=bar&x=y HTTP/1.0
@@ -43,7 +43,7 @@ def test_query_string(env, start_response):
     start_response('200 ok', [])
     return iter(lambda: None, None)
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_content__star(env, start_response):
     '''
     GET / HTTP/1.1
@@ -57,26 +57,26 @@ def test_content__star(env, start_response):
     start_response('200 ok', [])
     return ['']
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_empty_query_string(env, start_response):
     assert_equal(env.get('QUERY_STRING', ''), '')
     start_response('200 ok', [])
     return ['blah']
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_server_star(env, start_response):
     assert_equal(env['SERVER_NAME'], SERVER_HOST)
-    assert_equal(env['SERVER_PORT'], str(SERVER_PORT))
+    assert_contains(SERVER_PORT_RANGE, int(env['SERVER_PORT']))
     start_response('200 ok', [])
     return ()
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_server_protocol(env, start_response):
     assert_equal(env['SERVER_PROTOCOL'], 'HTTP/1.0')
     start_response('200 ok', [])
     return []
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_http_vars(env, start_response):
     '''
     GET /foo HTTP/1.1
@@ -104,7 +104,7 @@ def test_http_vars(env, start_response):
     start_response('200 ok', [])
     return []
 
-@expect.status(200, 'ok')
+@expect.Status(200, 'ok')
 def test_wsgi_vars(env, start_response):
     assert_isinstance(env['wsgi.version'], tuple)
     assert_equal(len(env['wsgi.version']), 2)
@@ -115,8 +115,8 @@ def test_wsgi_vars(env, start_response):
     start_response('200 ok', [])
     return []
 
-@expect.status(200)
-@expect.body('yay')
+@expect.Status(200)
+@expect.Body('yay')
 def test_input(env, start_response):
     '''
     GET /foo HTTP/1.1
@@ -139,9 +139,9 @@ def test_input(env, start_response):
     start_response('200 ok', [])
     return 'yay'
 
-@expect.status(200)
-@expect.body('yay')
-@expect.server_error('ExpectedError')
+@expect.Status(200)
+@expect.Body('yay')
+@expect.ServerError('ExpectedError')
 def test_errors(env, start_response):
     '''
     GET /foo HTTP/1.0

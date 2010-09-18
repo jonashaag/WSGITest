@@ -34,7 +34,7 @@ def run_tests(files):
 
     rack.start_servers(chain_iterable(testsuite.tests.itervalues()))
     import time
-    time.sleep(0.3)
+    time.sleep(0.5)
     client.run(testsuite)
     rack.stop_servers()
 

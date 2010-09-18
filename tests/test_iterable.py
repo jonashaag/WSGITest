@@ -1,8 +1,8 @@
 from wsgitest import expect
 
-@expect.status(200, 'Ok')
-@expect.body('hello\nfrom\na\nsimple\niterable')
-@expect.header('Content-Length', '28')
+@expect.Status(200, 'Ok')
+@expect.Body('hello\nfrom\na\nsimple\niterable')
+@expect.Header('Content-Length', '28')
 def test_simple(env, start_response):
     start_response('200 Ok', [('Content-Length', '28')])
     yield 'hello\n'
@@ -11,7 +11,7 @@ def test_simple(env, start_response):
     yield 'simple\n'
     yield 'iterable'
 
-@expect.server_error(NameError)
+@expect.ServerError(NameError)
 # no expectations for body/status here,
 # because the response in this is undefined.
 def test_with_error(env, start_response):
@@ -20,9 +20,9 @@ def test_with_error(env, start_response):
     a # NameError
     yield 'bar'
 
-@expect.status(321, 'blah')
-@expect.body('hello world!')
-@expect.header('Content-Length', '12')
+@expect.Status(321, 'blah')
+@expect.Body('hello world!')
+@expect.Header('Content-Length', '12')
 def test_with_start_response_in_generator(env, start_response):
     x = False
     for item in ('hello ', 'wor', 'ld!'):
@@ -31,8 +31,8 @@ def test_with_start_response_in_generator(env, start_response):
             start_response('321 blah', [('Content-Length', '12')])
         yield item
 
-@expect.body('thisisacustomstringfromacustomiterable')
-@expect.header('Content-Length', None)
+@expect.Body('thisisacustomstringfromacustomiterable')
+@expect.Header('Content-Length', None)
 def test_custom_iterable(env, start_response):
     start_response('200 ok', [])
     class foo(object):
@@ -41,8 +41,8 @@ def test_custom_iterable(env, start_response):
                 yield char
     return foo()
 
-@expect.body('thisisacustomstringfromacustomiterable'[:11])
-@expect.header('Content-Length', '11')
+@expect.Body('thisisacustomstringfromacustomiterable'[:11])
+@expect.Header('Content-Length', '11')
 def test_custom_iterable_with_len(env, start_response):
     start_response('200 ok', [('Content-Length', '11')])
     class foo(object):
