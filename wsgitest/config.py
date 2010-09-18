@@ -1,11 +1,5 @@
-import os
-from wsgitest.utils import import_file
+SERVER_HOST = '127.0.0.1'
+SERVER_PORT_RANGE = xrange(8000, 9000)
+USER_AGENT = 'wsgitest/0.2'
 
-_conf_module = import_file(os.path.join(os.getcwd(), 'wsgitest_config.py'))
-
-SERVER_HOST = getattr(_conf_module, 'SERVER_HOST', '127.0.0.1')
-SERVER_PORT = getattr(_conf_module, 'SERVER_PORT', 9999)
-SERVER_BOOT_DURATION = _conf_module.SERVER_BOOT_DURATION
-
-def run_server(app):
-    _conf_module.run_server(app, SERVER_HOST, SERVER_PORT)
+from bjoern import run as run_server

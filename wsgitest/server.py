@@ -1,40 +1,61 @@
-import os
 import sys
-import time
-import inspect
 import subprocess
-import signal
+from wsgitest.utils import get_sourcefile
 
-from wsgitest import config
+try:
+    from signal import alarm
+    del alarm
+    import signal
+except ImportError:
+    def execute_after_timeout(func, func2, timeout):
+        func()
+else:
+    def execute_after_timeout(func, func2, timeout):
+        signal.signal(signal.SIGALRM, func2)
+        signal.alarm(timeout)
+        func()
+        signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
-SERVER_RUNNER = os.path.join(os.path.dirname(__file__), os.pardir, 'run-server.py')
 
-SIGNALS = dict((getattr(signal, k), '%s (%d)' % (k, getattr(signal, k)))
-               for k in dir(signal) if k.isupper())
+class Rack(object):
+    def __init__(self):
+        self.results = []
+        self._running_servers = []
 
+    def start_servers(self, tests):
+        for index, test in enumerate(tests):
+            proc = subprocess.Popen(
+                [sys.executable, __file__, str(index),
+                 get_sourcefile(test.app), test.app.__name__],
+                stderr=subprocess.PIPE, stdout=subprocess.PIPE
+            )
+            self._running_servers.append(proc)
 
-class Subprocess(subprocess.Popen):
-    killed = False
+    def stop_servers(self):
+        for proc in self._running_servers:
+            execute_after_timeout(proc.terminate, proc.kill, timeout=3)
+            self.results.append(
+                #ServerResult.from_output
+                [
+                    proc.stdout.read(),
+                    proc.stderr.read()
+                ]
+            )
+        self._running_servers = []
 
-    def terminate(self):
-        rv = self.poll()
-        if rv is None:
-            subprocess.Popen.terminate(self)
-        else:
-            if rv < 0 and rv != -15:
-                rv = -rv
-                self.killed = True
-                self.killed_msg = SIGNALS.get(rv, rv)
+if __name__ == '__main__':
+    from wsgitest.config import SERVER_HOST, SERVER_PORT_RANGE, run_server
+    from wsgitest.exceptions import ImproperlyConfigured
+    from wsgitest.utils import import_file
 
-        self.stderr_buf = self.stderr.read().strip('\n')
+    i_am_number = int(sys.argv[1])
+    app_file = sys.argv[2]
+    app_name = sys.argv[3]
+    app = getattr(import_file(app_file), app_name)
 
-def run(test):
-    app_file = inspect.getsourcefile(test.app)
-    app_name = test.app.__name__
-    proc = Subprocess(
-        [sys.executable, SERVER_RUNNER, app_file, app_name],
-        stderr=subprocess.PIPE
-    )
-    # give the server a chance to boot up
-    time.sleep(config.SERVER_BOOT_DURATION)
-    return proc
+    try:
+        port = SERVER_PORT_RANGE[i_am_number]
+    except IndexError:
+        raise ImproperlyConfigured("Too small port range for all tests")
+
+    run_server(app, SERVER_HOST, port)
