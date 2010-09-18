@@ -5,11 +5,9 @@ DEFAULT_REQUEST = '''GET /wsgitest?version=0.2'''
 class Testsuite(object):
     def __init__(self):
         self.tests = OrderedDict()
-        self.number_of_tests = 0 # TODO: Get rid of this
 
     def add_tests(self, module, tests):
         self.tests[module] = tests
-        self.number_of_tests += len(tests)
 
     def validate_responses(self, responses):
         responses = iter(responses)
