@@ -2,7 +2,7 @@ from wsgitest import expect
 
 @expect.Status(200, 'Ok')
 @expect.Body('hello')
-def test_empty_headers(env, start_response):
+def test_empty_header(env, start_response):
     start_response('200 Ok', [])
     return ['hello']
 

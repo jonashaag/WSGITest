@@ -32,20 +32,35 @@ except ImportError:
             for key, value in self.iteritems():
                 yield value
 
-def docstring_to_request(docstring):
-    if not docstring:
-        return docstring
+def normalize_docstring(docstring):
+    def itersplit(s, c):
+        buf = []
+        for char in s:
+            if char == c:
+                yield ''.join(buf)
+                buf = []
+            else:
+                buf.append(char)
+        yield ''.join(buf)
 
-    docstring = docstring.strip().split('\n')
-    indentation = len(docstring[0]) - len(docstring[0].lstrip())
-    if not docstring[0][indentation:]:
-        docstring = docstring[1:]
-    if not docstring[-1][indentation]:
-        docstring = docstring[:-1]
+    docstring_iter = iter(docstring)
+    if docstring[0] == '\n':
+        docstring_iter.next()
 
-    return '\n'.join(
-        line[indentation:] for line in docstring
-    ).replace('\n', '\r\n').replace('\\n', '\n').replace('\\r', '\r')
+    lines = itersplit(docstring_iter, '\n')
+    first_line = lines.next()
+    indentation = len(first_line) - len(first_line.lstrip())
+    if '\t' in first_line[:identation]:
+        raise ValueError('Please indent with 4 spaces, not tabs')
+    yield first_line[indentation:]
+
+    prev = None
+    for line in lines:
+        if prev is not None:
+            yield prev
+        prev = line[indentation:]
+    if prev != '\n':
+        yield prev
 
 def import_file(filename):
     if not os.path.exists(filename):

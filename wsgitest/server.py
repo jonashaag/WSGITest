@@ -2,21 +2,6 @@ import sys
 import subprocess
 from wsgitest.utils import get_sourcefile
 
-try:
-    from signal import alarm
-    del alarm
-    import signal
-except ImportError:
-    def execute_after_timeout(func, func2, timeout):
-        func()
-else:
-    def execute_after_timeout(func, func2, timeout):
-        signal.signal(signal.SIGALRM, func2)
-        signal.alarm(timeout)
-        func()
-        signal.signal(signal.SIGALRM, signal.SIG_DFL)
-
-
 class Rack(object):
     def __init__(self):
         self.results = []
@@ -27,17 +12,18 @@ class Rack(object):
             proc = subprocess.Popen(
                 [sys.executable, __file__, str(index),
                  get_sourcefile(test.app), test.app.__name__],
-                stderr=subprocess.PIPE, stdout=subprocess.PIPE
+                #stderr=subprocess.PIPE#, stdout=subprocess.PIPE
             )
             self._running_servers.append(proc)
 
     def stop_servers(self):
         for proc in self._running_servers:
-            execute_after_timeout(proc.terminate, proc.kill, timeout=3)
+            proc.terminate()
+            continue
             self.results.append(
                 #ServerResult.from_output
                 [
-                    proc.stdout.read(),
+                    #proc.stdout.read(),
                     proc.stderr.read()
                 ]
             )

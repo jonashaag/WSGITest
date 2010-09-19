@@ -1,6 +1,7 @@
-from wsgitest.utils import OrderedDict, docstring_to_request
+from wsgitest.utils import OrderedDict
+from wsgitest.request import Request
 
-DEFAULT_REQUEST = '''GET /wsgitest?version=0.2'''
+DEFAULT_REQUEST = Request('GET', '/wsgitest?version=0.2')
 
 class Testsuite(object):
     def __init__(self):
@@ -27,7 +28,9 @@ class Test(object):
 
     @classmethod
     def from_func(cls, testfunc):
-        request = docstring_to_request(testfunc.__doc__)
+        request = testfunc.__doc__
+        if request is not None:
+            request = Request.from_request(request)
         expectations = getattr(testfunc, '_expectations', ())
         return cls(testfunc, expectations, request)
 

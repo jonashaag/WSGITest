@@ -20,19 +20,16 @@ class Client(object):
                     response = sys.exc_info()
                 self.responses.append(response)
 
-    def request(self, host, port, raw_request):
-        raw_request = self.prepare_raw_request(raw_request)
+    def request(self, host, port, request):
+        buf = []
+        buf.append(' '.join([request.method, request.path, request.protocol]))
+        for field in request.header:
+            buf.append('%s: %s' % field)
+        buf.extend(['', ''])
+
         connection = httplib.HTTPConnection(host, port)
-        connection.send(raw_request)
+        connection.send('\r\n'.join(buf))
+        if request.body is not None:
+            connection.send(request.body)
         connection._HTTPConnection__state = httplib._CS_REQ_SENT
         return connection.getresponse()
-
-    def prepare_raw_request(self, raw_request):
-        header_end = raw_request.find('\r\n\r\n')
-        if raw_request.find('User-Agent', header_end) != -1:
-            # no User-Agent found
-            first_line_end = raw_request.find('\r\n') + 2
-            if first_line_end == 1: # -1 + 2 = 1
-                first_line_end = len(raw_request)
-            return raw_request[:first_line_end] + 'User-Agent: %s\r\n' + raw_request[first_line_end:]
-        return raw_request

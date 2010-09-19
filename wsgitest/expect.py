@@ -36,11 +36,11 @@ class Header(Expectation):
         self.value = value
 
     def validate(self, response, errors):
-        if self.name not in response.headers:
+        if self.name not in response.header:
             errors.add('Missing expected header%r' % self.name)
-        elif response.headers[self.name] != self.value:
+        elif response.header[self.name] != self.value:
             errors.add('Header %r: Got value %r, expected %r'
-                       % (self.name, response.headers[self.name], self.value))
+                       % (self.name, response.header[self.name], self.value))
 
 class Body(Expectation):
     def __init__(self, body):
