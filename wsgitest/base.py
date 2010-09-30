@@ -30,7 +30,7 @@ class Test(object):
     def from_func(cls, testfunc):
         request = testfunc.__doc__
         if request is not None:
-            request = Request.from_request(request)
+            request = Request.from_docstring(request)
         expectations = getattr(testfunc, '_expectations', ())
         return cls(testfunc, expectations, request)
 

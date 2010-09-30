@@ -1,6 +1,15 @@
 import sys
 import subprocess
+
+if __name__ == '__main__':
+    # Make sure the wsgitest module can be imported by fixing sys.path
+    class I_like_to_abuse_classes_to_keep_the_module_namespace_clean:
+        from os.path import join, abspath, dirname
+        from os import pardir
+        sys.path.append(abspath(join(dirname(abspath(__file__)), pardir)))
+
 from wsgitest.utils import get_sourcefile
+
 
 class Rack(object):
     def __init__(self):

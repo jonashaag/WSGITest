@@ -26,6 +26,7 @@ class Request(object):
         for line in lines:
             if not line:
                 # end of header
+                body = lines
                 break
             if line[0] in ' \t':
                 if name is None:

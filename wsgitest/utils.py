@@ -50,7 +50,7 @@ def normalize_docstring(docstring):
     lines = itersplit(docstring_iter, '\n')
     first_line = lines.next()
     indentation = len(first_line) - len(first_line.lstrip())
-    if '\t' in first_line[:identation]:
+    if '\t' in first_line[:indentation]:
         raise ValueError('Please indent with 4 spaces, not tabs')
     yield first_line[indentation:]
 
