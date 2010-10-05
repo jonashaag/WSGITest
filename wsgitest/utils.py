@@ -2,6 +2,7 @@ import os
 import sys
 import imp
 import inspect
+import string
 
 try:
     from collections import OrderedDict
@@ -23,6 +24,9 @@ except ImportError:
 
         def __contains__(self, name):
             return name in self._items
+
+        def __len__(self):
+            return len(self._keys)
 
         def iteritems(self):
             for key in self._keys:
@@ -82,3 +86,32 @@ def chain_iterable(iterables):
     for iterable in iterables:
         for item in iterable:
             yield item
+
+def find_exception(stderr):
+    for line in stderr.split('\n'):
+        if not line or line[0] not in string.letters:
+            # line is empty or does not start with (a-zA-Z).
+            # Can't be part of a traceback.
+            continue
+        line = line.strip()
+        if ':' in line:
+            # line might be of form "ExceptionName: exception message".
+            exc_name, exc_value = line.split(':', 1)
+            if not exc_value:
+                # "ExceptionName:" is no possible traceback formatting.
+                # This can't be an exception.
+                continue
+            return exc_name, exc_value
+        else:
+            # No ":" in this line, might be of form "ExceptionName", though.
+            # We have to invent something to separate exception lines from
+            # non-exception lines printed to stderr (which is a bad habit,
+            # but not rarely done by servers).
+            # The only thing I can think of is searching the name for
+            # common exception name patterns:
+            lowered = line.lower()
+            for pattern in ['error', 'exception', 'exist', 'empty', 'empty',
+                            'missing', 'permission', 'denied', 'empty']:
+                if pattern in lowered:
+                    return line, None
+    return None, None

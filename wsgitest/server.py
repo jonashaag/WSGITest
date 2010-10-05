@@ -8,6 +8,7 @@ if __name__ == '__main__':
         from os import pardir
         sys.path.append(abspath(join(dirname(abspath(__file__)), pardir)))
 
+from wsgitest.expect import ServerExpectation
 from wsgitest.utils import get_sourcefile
 
 
@@ -18,25 +19,36 @@ class Rack(object):
 
     def start_servers(self, tests):
         for index, test in enumerate(tests):
-            proc = subprocess.Popen(
+            test.proc = subprocess.Popen(
                 [sys.executable, __file__, str(index),
                  get_sourcefile(test.app), test.app.__name__],
-                #stderr=subprocess.PIPE#, stdout=subprocess.PIPE
+                stderr=subprocess.PIPE, stdout=subprocess.PIPE
             )
-            self._running_servers.append(proc)
+            self._running_servers.append(test)
 
     def stop_servers(self):
-        for proc in self._running_servers:
-            proc.terminate()
-            continue
+        for test in self._running_servers:
+            test.proc.terminate()
             self.results.append(
-                #ServerResult.from_output
-                [
-                    #proc.stdout.read(),
-                    proc.stderr.read()
-                ]
+                ServerResult.from_output(test, test.proc.stdout, test.proc.stderr)
             )
         self._running_servers = []
+
+    def __del__(self):
+        self.stop_servers()
+
+class ServerResult(list):
+    @classmethod
+    def from_output(cls, test, stdout, stderr):
+        errors = cls()
+        stdout = stdout.read()
+        stderr = stderr.read()
+        for expectation in test.expectations:
+            if not isinstance(expectation, ServerExpectation):
+                continue
+            expectation.validate(errors, stdout, stderr)
+        return errors
+
 
 if __name__ == '__main__':
     from wsgitest.config import SERVER_HOST, SERVER_PORT_RANGE, run_server

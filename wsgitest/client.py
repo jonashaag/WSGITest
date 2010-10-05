@@ -32,4 +32,6 @@ class Client(object):
         if request.body is not None:
             connection.send(request.body)
         connection._HTTPConnection__state = httplib._CS_REQ_SENT
-        return connection.getresponse()
+        response = connection.getresponse()
+        response.body = response.read()
+        return response

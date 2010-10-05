@@ -27,17 +27,18 @@ def find_tests(files_and_folders):
             suite.add_tests(module, module_tests)
     return suite
 
+import time
 def run_tests(files):
     testsuite = find_tests(files)
     rack = Rack()
     client = Client()
+    number_of_tests = sum(map(len, testsuite.tests.itervalues()))
 
     rack.start_servers(chain_iterable(testsuite.tests.itervalues()))
-    import time
-    time.sleep(3)
+    time.sleep(number_of_tests * 0.2)
     client.run(testsuite)
     rack.stop_servers()
 
     client_results = testsuite.validate_responses(client.responses)
 
-    return TestsuiteResult(client_results, rack.results)
+    return TestsuiteResult(testsuite.tests, client_results, rack.results)
