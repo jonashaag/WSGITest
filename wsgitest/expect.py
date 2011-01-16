@@ -28,6 +28,9 @@ class Status(ResponseExpectation):
         self.reason = reason
 
     def validate(self, errors, response):
+        if self.status is None:
+            # Explicitly expect no status
+            return
         status, reason = response.status, response.reason
         if self.reason is not None and reason != self.reason \
            and status != self.status:

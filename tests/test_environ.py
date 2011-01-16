@@ -2,13 +2,11 @@ from wsgitest import expect
 from wsgitest.config import SERVER_HOST, SERVER_PORT_RANGE
 from wsgitest.testutils import *
 
-@expect.Status(200, 'ok')
 def test_GET(env, start_response):
     assert_equal(env['REQUEST_METHOD'], 'GET')
     start_response('200 ok', [])
     return ()
 
-@expect.Status(200, 'ok')
 def test_POST(env, start_response):
     '''
     POST / HTTP/1.0
@@ -34,7 +32,6 @@ def test_BLAH(env, start_response):
 # TODO: SCRIPT_NAME
 #       PATH_INFO
 
-@expect.Status(200, 'ok')
 def test_query_string(env, start_response):
     '''
     GET /hello?foo=bar&x=y HTTP/1.0
@@ -43,7 +40,6 @@ def test_query_string(env, start_response):
     start_response('200 ok', [])
     return iter(lambda: None, None)
 
-@expect.Status(200, 'ok')
 def test_content__star(env, start_response):
     '''
     GET / HTTP/1.1
@@ -57,26 +53,25 @@ def test_content__star(env, start_response):
     start_response('200 ok', [])
     return ['']
 
-@expect.Status(200, 'ok')
 def test_empty_query_string(env, start_response):
+    '''
+    GET / HTTP/1.0
+    '''
     assert_equal(env.get('QUERY_STRING', ''), '')
     start_response('200 ok', [])
     return ['blah']
 
-@expect.Status(200, 'ok')
 def test_server_star(env, start_response):
     assert_equal(env['SERVER_NAME'], SERVER_HOST)
     assert_contains(SERVER_PORT_RANGE, int(env['SERVER_PORT']))
     start_response('200 ok', [])
     return ()
 
-@expect.Status(200, 'ok')
 def test_server_protocol(env, start_response):
-    assert_equal(env['SERVER_PROTOCOL'], 'HTTP/1.0')
+    assert_equal(env['SERVER_PROTOCOL'], 'HTTP/1.1')
     start_response('200 ok', [])
     return []
 
-@expect.Status(200, 'ok')
 def test_http_vars(env, start_response):
     '''
     GET /foo HTTP/1.1
@@ -119,14 +114,12 @@ def test_wsgi_vars(env, start_response):
 @expect.Body('yay')
 def test_input(env, start_response):
     '''
-    GET /foo HTTP/1.1
+    POST /foo HTTP/1.1
     Content-Length: 29
 
-    Hello\\nWorld,\\r\\n\twhat's\\r\\n\r\\n\\nup?
+    Hello<NL>World,\r<NL>\twhat's\r<NL>\r<NL><NL>up?
     '''
     input_ = env['wsgi.input']
-
-    # test wsgi.input:
     assert_equal(input_.read(1), 'H')
     assert_equal(input_.readline(), 'ello\n')
     for line in input_:
@@ -143,18 +136,9 @@ def test_input(env, start_response):
 @expect.Body('yay')
 @expect.ServerError('ExpectedError')
 def test_errors(env, start_response):
-    '''
-    GET /foo HTTP/1.0
-    Content-Length: 29
-
-    Hello\\nWorld,\\r\\n\twhat's\\r\\n\\r\\n\\nup?
-    '''
     errors = env['wsgi.errors']
-
-    # test wsgi.errors:
     errors.write("Hello World, this is an error\n")
     errors.writelines(["Hello\n", "ExpectedError: blah"])
     errors.flush()
-
     start_response('200 ok', [])
     return 'yay'

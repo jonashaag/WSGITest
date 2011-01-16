@@ -26,7 +26,7 @@ class Request(object):
         for line in lines:
             if not line:
                 # end of header
-                body = lines
+                body = '\r\n'.join(lines).replace('<NL>', '\n').rstrip('\r\n')
                 break
             if line[0] in ' \t':
                 if name is None:
@@ -40,5 +40,8 @@ class Request(object):
                 name, value = line.split(': ')
         else:
             body = None
+
+        if name is not None:
+            header.append((name, value))
 
         return cls(method, path, protocol, header, body)

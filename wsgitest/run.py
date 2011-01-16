@@ -1,4 +1,5 @@
 import os
+import time
 from wsgitest.base    import Test, Testsuite, TestsuiteResult
 from wsgitest.client  import Client
 from wsgitest.server  import Rack
@@ -27,18 +28,15 @@ def find_tests(files_and_folders):
             suite.add_tests(module, module_tests)
     return suite
 
-import time
 def run_tests(files):
     testsuite = find_tests(files)
     rack = Rack()
     client = Client()
-    number_of_tests = sum(map(len, testsuite.tests.itervalues()))
 
-    rack.start_servers(chain_iterable(testsuite.tests.itervalues()))
-    time.sleep(number_of_tests * 0.2)
-    client.run(testsuite)
+    gen = rack.start_servers_lazily(testsuite.tests.chainvalues())
+    start = time.time()
+    client.run(testsuite, gen)
+    duration = time.time() - start
     rack.stop_servers()
 
-    client_results = testsuite.validate_responses(client.responses)
-
-    return TestsuiteResult(testsuite.tests, client_results, rack.results)
+    return testsuite.get_result(client.responses, rack.outputs, duration)

@@ -3,6 +3,11 @@ import sys
 import imp
 import inspect
 import string
+import socket
+import errno
+
+class dummy:
+    pass
 
 try:
     from collections import OrderedDict
@@ -109,9 +114,18 @@ def find_exception(stderr):
             # but not rarely done by servers).
             # The only thing I can think of is searching the name for
             # common exception name patterns:
-            lowered = line.lower()
+            lowered = line.split()[0].lower()
             for pattern in ['error', 'exception', 'exist', 'empty', 'empty',
                             'missing', 'permission', 'denied', 'empty']:
                 if pattern in lowered:
                     return line, None
     return None, None
+
+def can_connect(*args):
+    try:
+        socket.create_connection(args).close()
+        return True
+    except socket.error, exc:
+        if exc.errno == errno.ECONNREFUSED:
+            return False
+        raise

@@ -1,23 +1,24 @@
 import sys
+import time
 import subprocess
 
 if __name__ == '__main__':
     # Make sure the wsgitest module can be imported by fixing sys.path
-    class I_like_to_abuse_classes_to_keep_the_module_namespace_clean:
-        from os.path import join, abspath, dirname
-        from os import pardir
-        sys.path.append(abspath(join(dirname(abspath(__file__)), pardir)))
+    from os.path import join, abspath, dirname
+    from os import pardir
+    sys.path.append(abspath(join(dirname(abspath(__file__)), pardir)))
+    del join, abspath, dirname, pardir
 
-from wsgitest.expect import ServerExpectation
-from wsgitest.utils import get_sourcefile
-
+from wsgitest.utils import get_sourcefile, can_connect
+from wsgitest.config import run_server, SERVER_HOST, SERVER_PORT_RANGE, \
+                            SERVER_BOOT_DURATION
 
 class Rack(object):
     def __init__(self):
-        self.results = []
+        self.outputs = []
         self._running_servers = []
 
-    def start_servers(self, tests):
+    def start_servers_lazily(self, tests):
         for index, test in enumerate(tests):
             test.proc = subprocess.Popen(
                 [sys.executable, __file__, str(index),
@@ -25,33 +26,29 @@ class Rack(object):
                 stderr=subprocess.PIPE, stdout=subprocess.PIPE
             )
             self._running_servers.append(test)
+            time.sleep(SERVER_BOOT_DURATION)
+            yield
+
+    def start_all_servers(self, tests):
+        for server in self.start_servers_lazily(tests):
+            pass
+        dummy_server = subprocess.Popen([sys.executable, __file__, str(index+1),
+                                         __file__, 'dummy'])
+        while not can_connect(SERVER_HOST, SERVER_PORT_RANGE[index+1]):
+            time.sleep(0.1)
+        dummy_server.terminate()
 
     def stop_servers(self):
         for test in self._running_servers:
             test.proc.terminate()
-            self.results.append(
-                ServerResult.from_output(test, test.proc.stdout, test.proc.stderr)
-            )
+            self.outputs.append([test.proc.stdout.read(), test.proc.stderr.read()])
         self._running_servers = []
 
     def __del__(self):
         self.stop_servers()
 
-class ServerResult(list):
-    @classmethod
-    def from_output(cls, test, stdout, stderr):
-        errors = cls()
-        stdout = stdout.read()
-        stderr = stderr.read()
-        for expectation in test.expectations:
-            if not isinstance(expectation, ServerExpectation):
-                continue
-            expectation.validate(errors, stdout, stderr)
-        return errors
-
 
 if __name__ == '__main__':
-    from wsgitest.config import SERVER_HOST, SERVER_PORT_RANGE, run_server
     from wsgitest.exceptions import ImproperlyConfigured
     from wsgitest.utils import import_file
 
@@ -66,3 +63,5 @@ if __name__ == '__main__':
         raise ImproperlyConfigured("Too small port range for all tests")
 
     run_server(app, SERVER_HOST, port)
+else:
+    from wsgitest.utils import dummy
